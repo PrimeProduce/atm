@@ -9,11 +9,11 @@ startImg = pygame.image.load('start07.png')
 gameOverImg = pygame.image.load('gameOver06.png')
 newHighScoreImg = pygame.image.load('newHighScore06.png')
 
-FPS = 13
-WINDOWWIDTH = 1410
-WINDOWHEIGHT = 1020
-# WINDOWWIDTH = 620
-# WINDOWHEIGHT = 480
+FPS = 10
+# WINDOWWIDTH = 1410
+# WINDOWHEIGHT = 1020
+WINDOWWIDTH = 600
+WINDOWHEIGHT = 570
 CELLSIZE = 30
 assert WINDOWWIDTH % CELLSIZE == 0, "Window width must be a multiple of cell size."
 assert WINDOWHEIGHT % CELLSIZE == 0, "Window height must be a multiple of cell size."
@@ -311,7 +311,7 @@ def drawApple(coord):
 
     # hiddenRect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
     # pygame.draw.rect(DISPLAYSURF, REDRED, hiddenRect)
-    pygame.draw.circle(DISPLAYSURF, YELLOW, (x+10,y+10), CELLSIZE - 13, 0)
+    pygame.draw.circle(DISPLAYSURF, YELLOW, (x+15,y+15), CELLSIZE - 20, 0)
 
 
 def drawGrid():
