@@ -166,9 +166,9 @@ def runGame():
 
 
 def drawPressKeyMsg():
-    pressKeySurf = BASICFONT.render('Press 2 to play.', True, YELLOW)
+    pressKeySurf = pygame.font.Font('arial.ttf', 36).render('Press 2 to play.', True, YELLOW)
     pressKeyRect = pressKeySurf.get_rect()
-    pressKeyRect.topleft = (WINDOWWIDTH - 480, WINDOWHEIGHT - 69)
+    pressKeyRect.topleft = (WINDOWWIDTH - 250, WINDOWHEIGHT - 42)
     DISPLAYSURF.blit(pressKeySurf, pressKeyRect)
 
 
@@ -234,9 +234,7 @@ def showGameOverScreen(score):
     pygame.mixer.music.load('errorTone3.wav')
     pygame.mixer.music.play(0)
 
-    # if score > 4:
-    #     ser.write("$"+str(score*20 )+"\n")
-    #     print "PRINT RECEIPT"
+
 
     gameOverFont = pygame.font.Font('arial.ttf', 150)
     gameSurf = gameOverFont.render('GAME', True, YELLOW)
@@ -255,10 +253,10 @@ def showGameOverScreen(score):
         with open(score_file_path, 'r') as score_file:
             contents = score_file.read()
 
-    highScoreFont = pygame.font.Font('arial.ttf', 90)
+    highScoreFont = pygame.font.Font('arial.ttf', 60)
     highScoreSurf = highScoreFont.render('HIGH SCORE: $%s' % (contents), True, YELLOW)
     highScoreRect = highScoreSurf.get_rect()
-    highScoreRect.midtop = (WINDOWWIDTH / 2, WINDOWHEIGHT - 194)
+    highScoreRect.midtop = (WINDOWWIDTH / 2, WINDOWHEIGHT - 116)
     DISPLAYSURF.blit(highScoreSurf, highScoreRect)
 
 
@@ -269,7 +267,7 @@ def showGameOverScreen(score):
     checkForKeyPress() # clear out any key presses in the event queue
 
 
-    count = 800000
+    count = 80099
 
     while count > 0:
         count-= 1
@@ -281,9 +279,9 @@ def showGameOverScreen(score):
     showStartScreen()
 
 def drawScore(score):
-    scoreSurf = BASICFONT.render('Score: $%s' % (score * 20), True, YELLOW)
+    scoreSurf = pygame.font.Font('arial.ttf', 38).render('Score: $%s' % (score * 20), True, YELLOW)
     scoreRect = scoreSurf.get_rect()
-    scoreRect.topleft = (WINDOWWIDTH - 320, 17)
+    scoreRect.topleft = (WINDOWWIDTH - 230, 5)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
 
 
