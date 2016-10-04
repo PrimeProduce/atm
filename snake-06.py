@@ -9,7 +9,7 @@ startImg = pygame.image.load('start07.png')
 gameOverImg = pygame.image.load('gameOver06.png')
 newHighScoreImg = pygame.image.load('newHighScore06.png')
 
-FPS = 10
+FPS = 8
 # WINDOWWIDTH = 1410
 # WINDOWHEIGHT = 1020
 WINDOWWIDTH = 600
