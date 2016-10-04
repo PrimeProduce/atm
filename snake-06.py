@@ -222,6 +222,7 @@ def showStartScreen():
 
 
 def terminate():
+    pygame.display.quit()
     pygame.quit()
     sys.exit()
 
