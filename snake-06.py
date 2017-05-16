@@ -5,7 +5,7 @@ from pygame import mixer
 # import serial
 import random, pygame, sys, os
 from pygame.locals import *
-startImg = pygame.image.load('start07.png')
+startImg = pygame.image.load('start08.png')
 gameOverImg = pygame.image.load('gameOver06.png')
 newHighScoreImg = pygame.image.load('newHighScore06.png')
 
