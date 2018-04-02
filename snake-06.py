@@ -67,14 +67,14 @@ def main():
 def getPlayerName():
 
     chlist = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&_- "
-    yousuretext = ["SUBMIT", "YOU SURE?"]
+    yousuretext = ["SUBMIT", "YOU SURE?", "OK!"]
 
     initials = [0,0,0,0,0,0]
     cursor = 0
     submitstate = 0
 
     def drawMessage(inits, cursor, submitstate):
-        DISPLAYSURF.fill(DARKGRAY)
+        DISPLAYSURF.fill(BGCOLOR)
 
         st1 = "YOU HAVE BEATEN THE HIGH SCORE!"
         pressKeySurf = pygame.font.Font('arial.ttf', 26).render(st1, True, YELLOW)
@@ -135,15 +135,18 @@ def getPlayerName():
                 cursor += 1
 
 
-            submitstate = min(len(yousuretext), submitstate)
+            submitstate = min(len(yousuretext) - 1, submitstate)
+            submitstate = max(0, submitstate)
             cursor = max(0, cursor)
             cursor = min(len(initials), cursor)
             for i in xrange(len(initials)):
                 initials[i] = initials[i] % len(chlist)
 
-            if(submitstate >= len(yousuretext)):
+            if(submitstate >= len(yousuretext) - 1):
                 init_text =  "".join([chlist[init] for init in initials])
                 pygame.event.get() # clear event queue
+                DISPLAYSURF.fill(BGCOLOR)
+                pygame.display.update()
                 return init_text
 
             drawMessage(initials, cursor, submitstate)
