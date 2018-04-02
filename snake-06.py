@@ -62,26 +62,114 @@ def main():
 
         if score:
             saveScore(score)
-        showGameOverScreen(score)
+        showGameOverScreen()
 
+def getPlayerName():
+
+    chlist = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&_- "
+    yousuretext = ["SUBMIT", "YOU SURE?"]
+
+    initials = [0,0,0,0,0,0]
+    cursor = 0
+    submitstate = 0
+
+    def drawMessage(inits, cursor, submitstate):
+        DISPLAYSURF.fill(DARKGRAY)
+
+        st1 = "YOU HAVE BEATEN THE HIGH SCORE!"
+        pressKeySurf = pygame.font.Font('arial.ttf', 26).render(st1, True, YELLOW)
+        DISPLAYSURF.blit(pressKeySurf, (60,50))
+
+        st1 = "WHAT IS YOUR NAME?"
+        pressKeySurf = pygame.font.Font('arial.ttf', 36).render(st1, True, YELLOW)
+        DISPLAYSURF.blit(pressKeySurf, (100,100))
+
+        init_x = 50
+        init_y = 250
+        textsize = 90 
+        kernfactor = 0.8
+        for i in xrange(len(initials)): 
+            thisinit = chlist[initials[i]]
+            disp_init = pygame.font.Font('arial.ttf', textsize).render(thisinit, True, YELLOW)
+            DISPLAYSURF.blit(disp_init, (init_x + (i * textsize * kernfactor), init_y))
+
+        pygame.draw.line(DISPLAYSURF, WHITE, [init_x + (cursor * textsize * kernfactor), init_y + textsize], [init_x - 10 + ((cursor + 1) * textsize * kernfactor), init_y + textsize], 5)
+
+
+        disp_enter = pygame.font.Font('arial.ttf', 18).render(yousuretext[submitstate], True, YELLOW)
+        DISPLAYSURF.blit(disp_enter, (480, init_y + textsize - 45))
+
+
+        pygame.display.update()
+
+    drawMessage(initials, cursor, submitstate)
+
+
+    pygame.event.get() # clear event queue
+    while True:
+        keyDownEvents = pygame.event.get(KEYDOWN)
+        if len(keyDownEvents) != 0:
+            pygame.mixer.music.load('beep2.wav')
+            pygame.mixer.music.play(0)
+
+            if keyDownEvents[0].key == K_ESCAPE:
+                terminate()
+
+            if keyDownEvents[0].key == K_UP:
+                if(cursor < len(initials)):
+                    initials[cursor] += 1
+                else:
+                    submitstate += 1
+
+            if keyDownEvents[0].key == K_DOWN:
+                if(cursor < len(initials)):
+                    initials[cursor] -= 1
+                else:
+                    submitstate -= 1
+
+            if keyDownEvents[0].key == K_LEFT:
+                cursor -= 1
+                submitstate = 0
+
+            if keyDownEvents[0].key == K_RIGHT:
+                cursor += 1
+
+
+            submitstate = min(len(yousuretext), submitstate)
+            cursor = max(0, cursor)
+            cursor = min(len(initials), cursor)
+            for i in xrange(len(initials)):
+                initials[i] = initials[i] % len(chlist)
+
+            if(submitstate >= len(yousuretext)):
+                init_text =  "".join([chlist[init] for init in initials])
+                pygame.event.get() # clear event queue
+                return init_text
+
+            drawMessage(initials, cursor, submitstate)
 
 
 def saveScore(score):
-    score = score * 20
+    
+    myScore = score * 20
+
     if os.path.exists(score_file_path):
         with open(score_file_path, 'r') as score_file:
             contents = score_file.read()
-            contents = contents.replace("\n", "")
+            (prevHighScore, scoreName) = contents.split(",")
     else:
-        contents = None
-    if not contents:
-        prev_high_score = 0
-    else:
-        prev_high_score = int(contents)
-    if (score > prev_high_score):
+        prevHighScore = 0
+
+    print myScore
+    print prevHighScore
+
+    if (int(myScore) > int(prevHighScore)):
+
+        name = getPlayerName()
+
         with open(score_file_path, 'w') as score_file:
-            score_file.write(str(score))
-            print "saved new high score: {}".format(score)
+            score_file.write(str(myScore) + "," + name)
+            print "saved new high score: {}".format(myScore)
             # gameOverFont = pygame.font.Font('arial.ttf', 50)
             # gameSurf = gameOverFont.render(u'\u2605NEW HIGH SCORE!\u2605', True, YELLOW)
             # gameSurf = gameOverFont.render('$$NEW HIGH SCORE$$', True, GREENGREEN)
@@ -231,7 +319,7 @@ def getRandomLocation():
     return {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
 
 
-def showGameOverScreen(score):
+def showGameOverScreen():
     pygame.mixer.music.load('errorTone3.wav')
     pygame.mixer.music.play(0)
 
@@ -247,35 +335,37 @@ def showGameOverScreen(score):
 
     # DISPLAYSURF.blit(gameSurf, gameRect)
     # DISPLAYSURF.blit(overSurf, overRect)
-    DISPLAYSURF.blit(gameOverImg,(0,0))
+    DISPLAYSURF.blit(gameOverImg,(0,-30))
 
 
     if os.path.exists(score_file_path):
         with open(score_file_path, 'r') as score_file:
-            contents = score_file.read()
+            contents = score_file.read().strip()
+    (highScore, scoreName) = contents.split(",")
 
     highScoreFont = pygame.font.Font('arial.ttf', 60)
-    highScoreSurf = highScoreFont.render('HIGH SCORE: $%s' % (contents), True, YELLOW)
+    highScoreSurf = highScoreFont.render('HIGH SCORE: $%s' % (highScore), True, YELLOW)
     highScoreRect = highScoreSurf.get_rect()
-    highScoreRect.midtop = (WINDOWWIDTH / 2, WINDOWHEIGHT - 116)
+    highScoreRect.midtop = (WINDOWWIDTH / 2, WINDOWHEIGHT - 146)
     DISPLAYSURF.blit(highScoreSurf, highScoreRect)
 
+    scoreNameFont = pygame.font.Font('arial.ttf', 60)
+    scoreNameSurf = scoreNameFont.render("by: %s" % (scoreName), True, YELLOW)
+    scoreNameRect = scoreNameSurf.get_rect()
+    scoreNameRect.midtop = (WINDOWWIDTH / 2, WINDOWHEIGHT - 66)
+    DISPLAYSURF.blit(scoreNameSurf, scoreNameRect)
 
 
-    drawPressKeyMsg()
     pygame.display.update()
-    pygame.time.wait(500)
     checkForKeyPress() # clear out any key presses in the event queue
 
+    start_t = pygame.time.get_ticks()
 
-    count = 80099
-
-    while count > 0:
-        count-= 1
-        if checkForKeyPress():
-            pygame.event.get() # clear event queue
+    pygame.event.get() # clear event queue
+    while (pygame.time.get_ticks() - start_t) < (5 * 1000):
+        keyDownEvents = pygame.event.get(KEYDOWN)
+        if len(keyDownEvents) != 0:
             return
-
 
     showStartScreen()
 
