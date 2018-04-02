@@ -140,7 +140,7 @@ def getPlayerName():
             cursor = max(0, cursor)
             cursor = min(len(initials), cursor)
             for i in xrange(len(initials)):
-                initials[i] = initials[i] % len(chlist)
+                initials[i] = initials[i] % (len(chlist) - 1)
 
             if(submitstate >= len(yousuretext) - 1):
                 init_text =  "".join([chlist[init] for init in initials])
