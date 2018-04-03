@@ -414,4 +414,9 @@ def drawGrid():
 
 
 if __name__ == '__main__':
-    main()
+    while True:
+        try:
+            main()
+        except Exception as e:
+            print "ERROR:",
+            print e
