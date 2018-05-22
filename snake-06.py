@@ -4,6 +4,8 @@
 from pygame import mixer
 # import serial
 import random, pygame, sys, os
+import json, time
+import datetime
 from pygame.locals import *
 startImg = pygame.image.load('start08.png')
 gameOverImg = pygame.image.load('gameOver06.png')
@@ -37,7 +39,7 @@ REDRED  = ( 255,  0,  0)  # APPLE REALLY
 YELLOW  = ( 250,  225,  60)  #YELLOW
 GREENGREEN  = ( 0,  204,  0)  #GREEN
 BGCOLOR =   BLACK
-score_file_path = 'scorefile.txt'
+score_file_path = 'scorefile.json'
 
 UP = 'up'
 DOWN = 'down'
@@ -45,6 +47,8 @@ LEFT = 'left'
 RIGHT = 'right'
 
 HEAD = 0 # syntactic sugar: index of the worm's head
+
+HIGHSCOREMAXNUM = 10
 
 
 def main():
@@ -58,11 +62,12 @@ def main():
     pygame.mouse.set_visible(0)
     pygame.display.set_caption('ITP BANK')
 
+
     showStartScreen()
     while True:
         score = runGame()
 
-        if score:
+        if isHighScore(score):
             saveScore(score)
         showGameOverScreen()
 
@@ -78,7 +83,7 @@ def getPlayerName():
     def drawMessage(inits, cursor, submitstate):
         DISPLAYSURF.fill(BGCOLOR)
 
-        st1 = "YOU HAVE BEATEN THE HIGH SCORE!"
+        st1 = "YOU ARE A HIGH SCORE!"
         pressKeySurf = pygame.font.Font('arial.ttf', 26).render(st1, True, YELLOW)
         DISPLAYSURF.blit(pressKeySurf, (60,50))
 
@@ -154,34 +159,51 @@ def getPlayerName():
             drawMessage(initials, cursor, submitstate)
 
 
+def loadScores():
+    if os.path.exists(score_file_path):
+        with open(score_file_path, 'r') as score_file:
+            data = json.load(score_file)
+            data["scores"] = sorted(data["scores"], key=lambda l: l["score"], reverse=True)
+            return data
+    else:
+        return {} 
+
+def isHighScore(score):
+    myScore = score * 20
+    allScores = loadScores()
+
+    if len(allScores['scores']) < HIGHSCOREMAXNUM:
+        return True
+    else:
+        if myScore > allScores['scores'][-1]['score'] :
+            return True
+    return False
+    
+
 def saveScore(score):
     
     myScore = score * 20
-
-    if os.path.exists(score_file_path):
-        with open(score_file_path, 'r') as score_file:
-            contents = score_file.read()
-            (prevHighScore, scoreName) = contents.split(",")
-    else:
-        prevHighScore = 0
-
+    allScores = loadScores()
+    
     print myScore
-    print prevHighScore
 
-    if (int(myScore) > int(prevHighScore)):
+    name = getPlayerName()
 
-        name = getPlayerName()
+    allScores['scores'].append({ "score": myScore, "name": name, "ts": time.time() })
+    allScores["scores"] = sorted(allScores["scores"], key=lambda l: l["score"], reverse=True)
+    allScores["scores"] = allScores["scores"][:HIGHSCOREMAXNUM]
 
-        with open(score_file_path, 'w') as score_file:
-            score_file.write(str(myScore) + "," + name)
-            print "saved new high score: {}".format(myScore)
-            # gameOverFont = pygame.font.Font('arial.ttf', 50)
-            # gameSurf = gameOverFont.render(u'\u2605NEW HIGH SCORE!\u2605', True, YELLOW)
-            # gameSurf = gameOverFont.render('$$NEW HIGH SCORE$$', True, GREENGREEN)
-            # gameRect = gameSurf.get_rect()
-            # gameRect.midtop = (WINDOWWIDTH / 2, 310)
 
-            DISPLAYSURF.blit(newHighScoreImg,(0,0))
+    with open(score_file_path, 'w') as score_file:
+        json.dump(allScores, score_file,indent=4)
+        print "saved new high score: {}".format(myScore)
+        # gameOverFont = pygame.font.Font('arial.ttf', 50)
+        # gameSurf = gameOverFont.render(u'\u2605NEW HIGH SCORE!\u2605', True, YELLOW)
+        # gameSurf = gameOverFont.render('$$NEW HIGH SCORE$$', True, GREENGREEN)
+        # gameRect = gameSurf.get_rect()
+        # gameRect.midtop = (WINDOWWIDTH / 2, 310)
+
+        DISPLAYSURF.blit(newHighScoreImg,(0,0))
 
 
 
@@ -340,13 +362,13 @@ def showGameOverScreen():
 
     # DISPLAYSURF.blit(gameSurf, gameRect)
     # DISPLAYSURF.blit(overSurf, overRect)
-    DISPLAYSURF.blit(gameOverImg,(0,-30))
+    DISPLAYSURF.blit(gameOverImg,(0,0))
 
 
-    if os.path.exists(score_file_path):
-        with open(score_file_path, 'r') as score_file:
-            contents = score_file.read().strip()
-    (highScore, scoreName) = contents.split(",")
+    """
+    allScores = loadScores()
+    highScore = allScores['scores'][0]['score']
+    scoreName = allScores['scores'][0]['name']
 
     highScoreFont = pygame.font.Font('arial.ttf', 60)
     highScoreSurf = highScoreFont.render('HIGH SCORE: $%s' % (highScore), True, YELLOW)
@@ -359,20 +381,63 @@ def showGameOverScreen():
     scoreNameRect = scoreNameSurf.get_rect()
     scoreNameRect.midtop = (WINDOWWIDTH / 2, WINDOWHEIGHT - 66)
     DISPLAYSURF.blit(scoreNameSurf, scoreNameRect)
+    """
 
 
     pygame.display.update()
     checkForKeyPress() # clear out any key presses in the event queue
 
     start_t = pygame.time.get_ticks()
-
     pygame.event.get() # clear event queue
     while (pygame.time.get_ticks() - start_t) < (5 * 1000):
         keyDownEvents = pygame.event.get(KEYDOWN)
         if len(keyDownEvents) != 0:
-            return
+            break
+
+
+    showAllScores()
+
+
+    start_t = pygame.time.get_ticks()
+    pygame.event.get() # clear event queue
+    while (pygame.time.get_ticks() - start_t) < (7 * 1000):
+        keyDownEvents = pygame.event.get(KEYDOWN)
+        if len(keyDownEvents) != 0:
+           break 
 
     showStartScreen()
+
+def showAllScores():
+    DISPLAYSURF.fill(BGCOLOR)
+
+    allScores = loadScores()
+
+    fontsize = 30
+    linespacing = 1.1
+    highScoreFont = pygame.font.Font('joystix.ttf', fontsize)
+
+    thisScoreSurf = highScoreFont.render('  -- HIGH SCORES -- ', True, YELLOW)
+    thisScoreRect = thisScoreSurf.get_rect()
+    thisScoreRect.midtop = (WINDOWWIDTH / 2,  40)
+    DISPLAYSURF.blit(thisScoreSurf, thisScoreRect)
+
+    thisScoreSurf = highScoreFont.render('rank score  name  date ', True, YELLOW)
+    thisScoreRect = thisScoreSurf.get_rect()
+    thisScoreRect.midtop = (WINDOWWIDTH / 2,  120)
+    DISPLAYSURF.blit(thisScoreSurf, thisScoreRect)
+
+    for i in xrange(len(allScores['scores'])):
+        thisScore = allScores['scores'][i]
+
+        thisdate = datetime.datetime.fromtimestamp(thisScore['ts']).strftime("%b%d")
+        thisScoreSurf = highScoreFont.render('%2d. %5s %s %s' % (i+1, "$"+str(thisScore['score']), thisScore['name'], thisdate), True, YELLOW)
+        thisScoreRect = thisScoreSurf.get_rect()
+        thisScoreRect.midtop = (WINDOWWIDTH / 2,  180 + (i * fontsize * linespacing))
+        DISPLAYSURF.blit(thisScoreSurf, thisScoreRect)
+
+    pygame.display.update()
+
+
 
 def drawScore(score):
     scoreSurf = pygame.font.Font('arial.ttf', 38).render('Score: $%s' % (score * 20), True, YELLOW)
