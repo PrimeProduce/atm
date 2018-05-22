@@ -51,9 +51,11 @@ def main():
     global FPSCLOCK, DISPLAYSURF, BASICFONT
 
     pygame.init()
+
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT), pygame.FULLSCREEN)
     BASICFONT = pygame.font.Font('arial.ttf', 55)
+    pygame.mouse.set_visible(0)
     pygame.display.set_caption('ITP BANK')
 
     showStartScreen()
